@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Antik Yunan Klasikleri — Kronolojik Okuma Yol Haritası</title>
+  <meta name="description" content="Homeros'tan Plotinos'a Antik Yunan edebiyatı ve felsefesinin temel eserleri: kronolojik sıra, seviyeler, okuma yolları, eser özetleri ve okuma ilerlemesi.">
+  <meta name="theme-color" content="#0d1629">
+  <meta property="og:title" content="Antik Yunan Klasikleri — Kronolojik Okuma Yol Haritası">
+  <meta property="og:description" content="Mitolojiden felsefeye, Homeros'tan Aristoteles'e uzanan kronolojik okuma rehberi.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <script>
+    // Başlık ve gövde fontlarını erkenden yükle (file:// altında CORS nedeniyle atlanır)
+    if (/^https?:$/.test(location.protocol)) {
+      ["cormorant-garamond-latin-600-normal", "inter-latin-400-normal"].forEach(function (f) {
+        var l = document.createElement("link");
+        l.rel = "preload"; l.as = "font"; l.type = "font/woff2"; l.crossOrigin = "anonymous";
+        l.href = "assets/fonts/" + f + ".woff2";
+        document.head.appendChild(l);
+      });
+    }
+  </script>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/icons.js" defer></script>
+  <script src="js/data/meta.js" defer></script>
+  <script src="js/data/authors.js" defer></script>
+  <script src="js/data/books-1-arkaik.js" defer></script>
+  <script src="js/data/books-2-klasik-edebiyat.js" defer></script>
+  <script src="js/data/books-3-klasik-felsefe.js" defer></script>
+  <script src="js/data/books-4-helenistik-roma.js" defer></script>
+  <script src="js/data/paths.js" defer></script>
+  <script src="js/data/map.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">İçeriğe geç</a>
+
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="#/" aria-label="Antik Yunan Klasikleri — ana sayfa">
+        <span class="brand__mark"><svg class="motif" aria-hidden="true"><use href="#m-column"></use></svg></span>
+        <span class="brand__text">
+          <span class="brand__name">Klasikler</span>
+          <span class="brand__sub">Antik Yunan Okuma Yol Haritası</span>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="#/seviyeler" data-nav="seviyeler">Seviyeler</a>
+        <a href="#/yol-haritasi" data-nav="yol-haritasi">Yol Haritası</a>
+        <a href="#/okuma-yollari" data-nav="okuma-yollari">Okuma Yolları</a>
+        <a href="#/kitaplar" data-nav="kitaplar">Tüm Eserler</a>
+        <a href="#/kategoriler" data-nav="kategoriler">Kategoriler</a>
+        <a href="#/harita" data-nav="harita">Harita</a>
+        <a href="#/puanlama" data-nav="puanlama">Rehber</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn" type="button" data-action="open-search" aria-label="Eser veya yazar ara (kısayol: /)" title="Ara ( / )">
+          <svg class="ico"><use href="#i-search"></use></svg>
+        </button>
+        <a class="progress-pill" href="#/ilerleme" aria-label="Okuma ilerlemen">
+          <span class="ring" id="header-ring"></span><span class="txt" id="header-progress">%0</span>
+        </a>
+        <button class="icon-btn menu-btn" type="button" data-action="toggle-menu" aria-label="Menüyü aç" aria-expanded="false" aria-controls="mobile-nav">
+          <svg class="ico"><use href="#i-menu"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="mobile-nav" id="mobile-nav" aria-label="Mobil menü">
+    <a href="#/">Ana Sayfa <svg class="ico"><use href="#i-chevron-right"></use></svg></a>
+    <a href="#/seviyeler">Seviyeler <svg class="ico"><use href="#i-chevron-right"></use></svg></a>
+    <a href="#/yol-haritasi">Kronolojik Yol Haritası <svg class="ico"><use href="#i-chevron-right"></use></svg></a>
+    <a href="#/okuma-yollari">Okuma Yolları <svg class="ico"><use href="#i-chevron-right"></use></svg></a>
+    <a href="#/kitaplar">Tüm Eserler <svg class="ico"><use href="#i-chevron-right"></use></svg></a>
+    <a href="#/kategoriler">Kategoriler <svg class="ico"><use href="#i-chevron-right"></use></svg></a>
+    <a href="#/harita">Klasiklerin Haritası <svg class="ico"><use href="#i-chevron-right"></use></svg></a>
+    <a href="#/ilerleme">Okuma İlerlemem <svg class="ico"><use href="#i-chevron-right"></use></svg></a>
+    <a href="#/puanlama">Puanlama ve Rehber <svg class="ico"><use href="#i-chevron-right"></use></svg></a>
+  </nav>
+
+  <main id="main" tabindex="-1">
+    <noscript>
+      <div class="container section">
+        <h1>Antik Yunan Klasikleri</h1>
+        <p>Bu site etkileşimli bir okuma rehberidir ve çalışmak için JavaScript gerektirir. Lütfen tarayıcınızda JavaScript'i etkinleştirin.</p>
+      </div>
+    </noscript>
+  </main>
+
+  <footer class="site-footer">
+    <div class="meander" aria-hidden="true"></div>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <a class="brand" href="#/">
+            <span class="brand__mark"><svg class="motif" aria-hidden="true"><use href="#m-column"></use></svg></span>
+            <span class="brand__text"><span class="brand__name">Klasikler</span><span class="brand__sub">Antik Yunan Okuma Yol Haritası</span></span>
+          </a>
+          <p>Homeros'tan Plotinos'a, Antik Yunan edebiyatı ve düşüncesinin temel eserlerini kronolojik ve seviyeli bir yolculuk olarak sunan bağımsız bir okuma rehberi.</p>
+        </div>
+        <div>
+          <h4>Keşfet</h4>
+          <ul>
+            <li><a href="#/yol-haritasi">Kronolojik Yol Haritası</a></li>
+            <li><a href="#/okuma-yollari">Önerilen Okuma Yolları</a></li>
+            <li><a href="#/kitaplar">Tüm Eserler</a></li>
+            <li><a href="#/kategoriler">Kategoriler ve Dönemler</a></li>
+            <li><a href="#/harita">Klasiklerin Haritası</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Seviyeler</h4>
+          <ul id="footer-levels"></ul>
+        </div>
+        <div>
+          <h4>Rehber</h4>
+          <ul>
+            <li><a href="#/puanlama">Yıldızlar ne anlama geliyor?</a></li>
+            <li><a href="#/puanlama">Tarihlendirme ve kaynaklar</a></li>
+            <li><a href="#/ilerleme">Okuma ilerlemem</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>Okuma ilerlemeniz yalnızca bu tarayıcıda saklanır; hiçbir sunucuya gönderilmez.</span>
+        <span class="footer-greek" lang="grc">ΓΝΩΘΙ ΣΕΑΥΤΟΝ</span>
+      </div>
+    </div>
+  </footer>
+
+  <div class="search-overlay" id="search" role="dialog" aria-modal="true" aria-label="Eser ara" hidden>
+    <div class="search-panel">
+      <div class="search-panel__input">
+        <svg class="ico"><use href="#i-search"></use></svg>
+        <input id="search-input" type="search" role="combobox" placeholder="Eser, yazar ya da konu ara… (ör. Eflatun, Troya, Stoa)" autocomplete="off" aria-label="Eser, yazar ya da konu ara" aria-controls="search-results" aria-autocomplete="list" aria-expanded="false">
+        <span class="kbd">Esc</span>
+      </div>
+      <div class="search-results">
+        <p class="search-results__hint" id="search-hint" aria-live="polite"></p>
+        <div id="search-results" role="listbox" aria-label="Arama sonuçları"></div>
+        <p class="search-results__hint" id="search-more" hidden></p>
+      </div>
+      <div class="search-panel__foot">
+        <span>↑ ↓ ile gezin, Enter ile açın</span>
+        <a href="#/kitaplar" id="search-all">Tüm eserlerde filtrele <svg class="ico"><use href="#i-arrow-right"></use></svg></a>
+      </div>
+    </div>
+  </div>
+
+  <button class="to-top" type="button" data-action="to-top" aria-label="Sayfanın başına dön"><svg class="ico"><use href="#i-up"></use></svg></button>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
