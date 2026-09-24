@@ -253,7 +253,7 @@ window.KLASIK.books = (window.KLASIK.books || []).concat([
     motif: "kylix",
     tagline: "Bir akşam yemeğinde aşka övgüler: Eros'tan güzelliğin kendisine yükselen bir merdiven.",
     summary: [
-      "Tragedya şairi Agathon'un zaferini kutlamak için verilen şölende konuklar o gece içmek yerine konuşmayı seçer: Herkes sırayla aşk tanrısı Eros'a bir övgü söyleyecektir.",
+      "Tragedya şairi Agathon'un zaferini kutlamak için verilen şölende konuklar o gece aşırı içmek yerine konuşmayı seçer: Herkes sırayla aşk tanrısı Eros'a bir övgü söyleyecektir.",
       "Konuşmacılar arasında hekim Eryksimakhos, komedya şairi Aristophanes ve elbette Sokrates vardır. Aristophanes'in, insanların aslında ikiye bölünmüş varlıklar olduğu ve öteki yarılarını aradıkları üzerine anlattığı mit dünya edebiyatının en ünlü aşk hikâyelerinden biridir.",
       "Sokrates ise bilge kadın Diotima'dan öğrendiğini söylediği bir öğretiyi aktarır: Aşk, tek bir güzel bedenden başlayıp güzel ruhlara, bilgilere ve sonunda güzelliğin kendisine yükselen bir merdivendir. Şölen, beklenmedik bir konuğun gelişiyle yeni bir renge bürünür."
     ],

@@ -6,6 +6,14 @@
 
   const K = window.KLASIK;
 
+  /* Uygulama durumu: yönlendirici, arama penceresi ve mobil menü */
+  let currentRoute = null;
+  let lastHash = location.hash;
+  let navByClick = false;
+  let searchOpen = false, searchIndex = 0, searchItems = [], searchReturnFocus = null;
+  let menuOpen = false;
+  const scrollMemory = new Map();
+
   /* ───────────── Yardımcılar ───────────── */
   const $ = (sel, el = document) => el.querySelector(sel);
   const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
@@ -15,6 +23,7 @@
   const pad = (n) => String(n).padStart(2, "0");
   const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
   const upperTR = (s) => s.toLocaleUpperCase("tr");
+  const scrollBehavior = () => (window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
   const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 
   // Türkçe duyarlı, aksan/şapka farkını yok sayan arama normalizasyonu
@@ -22,9 +31,9 @@
     String(s ?? "")
       .toLocaleLowerCase("tr")
       .normalize("NFD")
-      .replace(/[̀-ͯ]/g, "")
+      .replace(/[\u0300-\u036f]/g, "")
       .replace(/ı/g, "i")
-      .replace(/[^a-z0-9Ͱ-Ͽ\s]/g, " ")
+      .replace(/[^a-z0-9\u0370-\u03ff\s]/g, " ")
       .replace(/\s+/g, " ")
       .trim();
 
@@ -238,6 +247,8 @@
     </article>`;
   }
 
+  const shortDate = (d) => d.replace(/\s*[(;].*$/, "");
+
   function mini(b, extra = "") {
     return `<a class="mini${read.has(b.id) ? " is-read" : ""}" data-book="${b.id}" href="#/kitap/${b.id}" style="${lvlVar(b.level)}">
       ${cover(b, "xs")}
@@ -246,8 +257,7 @@
     </a>`;
   }
 
-  const shortDate = (d) => d.replace(/\s*[(;].*$/, "");
-  const progressBar = (scope, color) => `<div class="progress"><div class="progress__bar" data-progress="${scope}" style="--p:${pct(countRead(scopeBooks(scope)), scopeBooks(scope).length)}%${color ? ";background:" + color : ""}"></div></div>`;
+  const progressBar = (scope) => { const l = scopeBooks(scope); return `<div class="progress"><div class="progress__bar" data-progress="${scope}" style="--p:${pct(countRead(l), l.length)}%"></div></div>`; };
   const progressText = (scope) => { const l = scopeBooks(scope); return `<span data-progress="${scope}">${countRead(l)} / ${l.length}</span>`; };
 
   function pageHero({ eyebrow, title, lead, motifName, crumbs = [], extra = "", style = "", decor = "", cls = "" }) {
@@ -276,7 +286,7 @@
         <div class="level-card__top">
           <span class="level-card__greek" aria-hidden="true">${l.greek}</span>
           <div class="level-card__num">Seviye ${l.numeral}</div>
-          <h3 class="level-card__name">${esc(l.short === "Uzman" ? "Uzman" : l.short)}</h3>
+          <h3 class="level-card__name">${esc(l.short)}</h3>
           <div class="level-card__tag">${esc(l.tagline)}${l.id === "uzman" ? " · Derinleşme" : ""}</div>
         </div>
         <div class="level-card__body">
@@ -288,7 +298,7 @@
             <span class="level-card__cta">Eserleri gör ${icon("arrow-right")}</span>
           </div>
         </div>
-      </a>${i < LEVELS.length - 1 ? `<span class="levels__arrow" aria-hidden="true" style="left:${((i + 1) / LEVELS.length) * 100}%">${icon("chevron-right")}</span>` : ""}`;
+      </a>${i < LEVELS.length - 1 ? `<span class="levels__arrow" aria-hidden="true" style="left:calc(${((i + 1) / LEVELS.length) * 100}% + ${(((i + 1) / LEVELS.length) - 0.5) * 18}px)">${icon("chevron-right")}</span>` : ""}`;
     }).join("")}</div>`;
   }
 
@@ -399,7 +409,7 @@
       $$(".place.is-active", root).forEach((x) => x.classList.remove("is-active"));
       g.classList.add("is-active");
       panel.innerHTML = mapPanelFor(g.dataset.place);
-      if (scroll && window.matchMedia("(max-width: 1080px)").matches) panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      if (scroll && window.matchMedia("(max-width: 1080px)").matches) panel.scrollIntoView({ behavior: scrollBehavior(), block: "nearest" });
     };
     $$(".place", root).forEach((g) => {
       g.addEventListener("click", () => select(g));
@@ -590,7 +600,7 @@
       mount(root) {
         mountMap(root);
         const shelf = $("#must-shelf", root);
-        $$("[data-shelf]", root).forEach((btn) => btn.addEventListener("click", () => shelf.scrollBy({ left: Number(btn.dataset.shelf) * shelf.clientWidth * 0.8, behavior: "smooth" })));
+        $$("[data-shelf]", root).forEach((btn) => btn.addEventListener("click", () => shelf.scrollBy({ left: Number(btn.dataset.shelf) * shelf.clientWidth * 0.8, behavior: scrollBehavior() })));
       }
     };
   }
@@ -801,7 +811,8 @@
       title: "Tüm Eserler — Antik Yunan Klasikleri",
       nav: "kitaplar",
       html,
-      refresh: () => renderResults(),
+      // Okundu işaretlemesi kartları yerinde günceller; liste yalnızca okuma durumu filtresi varsa değişir
+      refresh: () => { if (f.durum) renderResults(); },
       mount(root) {
         renderResults(root);
         const input = $("#f-q", root);
@@ -985,9 +996,14 @@
     K.events.forEach((ev) => {
       const c = centuryOf(ev.year);
       const per = PERIODS.find((p) => ev.year >= p.from && ev.year < p.to) || PERIODS[PERIODS.length - 1];
-      const g = groups.find((x) => x.century === c && x.period === per.id) || groups.find((x) => x.century === c);
-      if (g) g.events.push(ev);
+      let g = groups.find((x) => x.century === c && x.period === per.id) || groups.find((x) => x.century === c);
+      // O yüzyıla ait eser yoksa (ör. MÖ 31 Aktion) olay kendi yüzyıl başlığıyla gösterilir
+      if (!g) { g = { period: per.id, century: c, books: [], events: [] }; groups.push(g); }
+      g.events.push(ev);
     });
+    const periodIndex = (id) => PERIODS.findIndex((p) => p.id === id);
+    groups.sort((x, y) => x.century - y.century || periodIndex(x.period) - periodIndex(y.period));
+    const anchorOf = (g) => `yy-${g.period}-${g.century < 0 ? "mo" + -g.century : "ms" + g.century}`;
     let lastPeriod = null;
     const body = groups.map((g) => {
       let out = "";
@@ -998,8 +1014,7 @@
       }
       const authors = [];
       g.books.forEach((b) => { if (!authors.includes(b.author)) authors.push(b.author); });
-      const anchor = `yy-${g.period}-${g.century < 0 ? "mo" + -g.century : "ms" + g.century}`;
-      out += `<div class="tl-century" id="${anchor}">
+      out += `<div class="tl-century" id="${anchorOf(g)}">
         <div class="tl-century__label"><span>${centuryLabel(g.century)}</span></div>
         ${g.events.length ? `<div class="tl-events">${g.events.sort((x, y) => x.year - y.year).map((ev) => `<span class="tl-event"><b>${yearLabel(ev.year)}</b>${esc(ev.label)}</span>`).join("")}</div>` : ""}
         <div class="tl-authors">${authors.map((aid, i) => {
@@ -1017,7 +1032,7 @@
       return out;
     }).join("");
 
-    const jump = groups.map((g) => `<a href="#" data-scroll-to="yy-${g.period}-${g.century < 0 ? "mo" + -g.century : "ms" + g.century}">${centuryShort(g.century)}${g.period === "helenistik" && g.century === -4 ? " (Hel.)" : ""}</a>`).join("");
+    const jump = groups.map((g) => `<button type="button" data-scroll-to="${anchorOf(g)}">${centuryShort(g.century)}${g.period === "helenistik" && g.century === -4 ? " (Hel.)" : ""}</button>`).join("");
 
     const html = `${pageHero({
       eyebrow: "Kronolojik Yol Haritası",
@@ -1294,16 +1309,18 @@
     [/^\/puanlama\/?$/, "puanlama", viewGuide]
   ];
 
-  let currentRoute = null;
-  let lastHash = location.hash;
-  let navByClick = false;
-  const scrollMemory = new Map();
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
+  const isRouteHash = (h) => !h || h === "#" || h.startsWith("#/");
+
   function parseHash() {
-    const raw = decodeURIComponent(location.hash.replace(/^#/, "")) || "/";
+    const raw = location.hash.replace(/^#/, "");
     const i = raw.indexOf("?");
-    return { path: i > -1 ? raw.slice(0, i) : raw, query: new URLSearchParams(i > -1 ? raw.slice(i + 1) : "") };
+    let path = i > -1 ? raw.slice(0, i) : raw;
+    // Sorgu kısmını URLSearchParams kendisi çözer; yalnızca yol güvenli biçimde çözülür
+    try { path = decodeURIComponent(path); } catch { /* bozuk yüzde kodlaması: olduğu gibi kullan */ }
+    if (!path.startsWith("/")) path = "/";
+    return { path, query: new URLSearchParams(i > -1 ? raw.slice(i + 1) : "") };
   }
 
   let revealObserver;
@@ -1330,20 +1347,41 @@
     if (!view) view = viewNotFound();
     const main = $("#main");
     const y = window.scrollY;
-    main.innerHTML = `<div class="view-enter">${view.html}</div>`;
+    // Yeniden çizimde klavye odağını korumak için odaktaki "okundu" düğmesini ve sırasını hatırla
+    const focusedBtn = opts.keepScroll ? document.activeElement?.closest?.("[data-toggle-read]") : null;
+    const focusedToggle = focusedBtn?.dataset.toggleRead;
+    const focusedIndex = focusedBtn ? $$("#main [data-toggle-read]").indexOf(focusedBtn) : -1;
+    // Aynı sayfanın yeniden çizimi (okundu işareti, içe aktarma) giriş animasyonlarını tekrarlamaz
+    main.innerHTML = `<div class="view ${opts.keepScroll ? "view--static" : "view-enter"}">${view.html}</div>`;
+    const root = main.firstElementChild;
     document.title = view.title;
     $$(".nav a").forEach((a) => a.classList.toggle("is-active", !!view.nav && a.dataset.nav === view.nav));
     currentRoute = { name, refresh: view.refresh };
-    view.mount?.(main);
-    initReveal(main);
+    view.mount?.(root);
+    initReveal(root);
     refreshProgress();
     closeMenu();
     if (opts.keepScroll) window.scrollTo(0, y);
-    else if (opts.restore != null) window.scrollTo(0, opts.restore);
+    else if (typeof opts.restore === "number") window.scrollTo(0, opts.restore);
     else window.scrollTo(0, 0);
+    if (focusedBtn) {
+      // Aynı düğme yoksa (ör. öneri kartı yeni esere geçtiyse) aynı sıradaki düğmeye odaklan
+      const target = $(`[data-toggle-read="${focusedToggle}"]`, root) || $$("[data-toggle-read]", root)[focusedIndex];
+      (target || $("#main")).focus({ preventScroll: true });
+    }
   }
 
   function onHashChange() {
+    // "#main" gibi sayfa içi çapalar bir sayfa değil: yönlendiriciye sokmadan hedefe git
+    if (!isRouteHash(location.hash)) {
+      let id = location.hash.slice(1);
+      try { id = decodeURIComponent(id); } catch { /* olduğu gibi */ }
+      history.replaceState(history.state, "", lastHash || location.pathname + location.search);
+      const target = document.getElementById(id);
+      if (target) { target.focus?.({ preventScroll: true }); target.scrollIntoView(); }
+      return;
+    }
+    if (searchOpen) closeSearch(false);
     scrollMemory.set(lastHash, window.scrollY);
     const restore = navByClick ? null : scrollMemory.get(location.hash) ?? null;
     navByClick = false;
@@ -1353,32 +1391,44 @@
   }
 
   /* ───────────── Genel arayüz: menü, arama, kısayollar ───────────── */
-  function closeMenu() {
-    const nav = $("#mobile-nav");
-    nav.classList.remove("is-open");
-    const btn = $("[data-action=toggle-menu]");
-    btn?.setAttribute("aria-expanded", "false");
-    document.body.style.overflow = searchOpen ? "hidden" : "";
-  }
+  function syncScrollLock() { document.body.style.overflow = searchOpen || menuOpen ? "hidden" : ""; }
 
-  let searchOpen = false, searchIndex = 0, searchItems = [];
-  function openSearch(initial = "") {
+  function setMenu(open) {
+    menuOpen = open;
+    $("#mobile-nav").classList.toggle("is-open", open);
+    const btn = $("[data-action=toggle-menu]");
+    btn?.setAttribute("aria-expanded", String(open));
+    btn?.setAttribute("aria-label", open ? "Menüyü kapat" : "Menüyü aç");
+    syncScrollLock();
+  }
+  function closeMenu() { if (menuOpen) setMenu(false); }
+
+  function openSearch() {
+    const input = $("#search-input");
+    if (searchOpen) { input.focus(); return; }
+    closeMenu();
+    searchReturnFocus = document.activeElement;
     const ov = $("#search");
     ov.hidden = false;
-    requestAnimationFrame(() => ov.classList.add("is-open"));
+    void ov.offsetWidth; // görünür hâle geldikten sonra sınıf eklensin ki geçiş animasyonu çalışsın
+    ov.classList.add("is-open");
     searchOpen = true;
-    document.body.style.overflow = "hidden";
-    const input = $("#search-input");
-    input.value = initial;
+    syncScrollLock();
+    input.value = "";
+    input.setAttribute("aria-expanded", "true");
     runSearch();
-    setTimeout(() => input.focus(), 30);
+    input.focus();
   }
-  function closeSearch() {
+  function closeSearch(restoreFocus = true) {
+    if (!searchOpen) return;
     const ov = $("#search");
     ov.classList.remove("is-open");
     searchOpen = false;
-    document.body.style.overflow = "";
+    $("#search-input").setAttribute("aria-expanded", "false");
+    syncScrollLock();
     setTimeout(() => { if (!searchOpen) ov.hidden = true; }, 220);
+    if (restoreFocus && searchReturnFocus?.isConnected) searchReturnFocus.focus({ preventScroll: true });
+    searchReturnFocus = null;
   }
   function highlight(text, q) {
     const nt = norm(text), tokens = norm(q).split(" ").filter(Boolean);
@@ -1391,11 +1441,15 @@
   function runSearch() {
     const q = $("#search-input").value.trim();
     const box = $("#search-results");
+    const hint = $("#search-hint"), more = $("#search-more");
     $("#search-all").href = "#/kitaplar" + (q ? "?q=" + encodeURIComponent(q) : "");
     const tokens = norm(q).split(" ").filter(Boolean);
+    more.hidden = true;
     if (!tokens.length) {
       searchItems = PATH["yeni-baslayanlar"].steps.slice(0, 5).map((s) => BOOK[s.id]);
-      box.innerHTML = `<div class="search-results__hint">Başlamak için bir eser ya da yazar adı yazın. Farklı yazımlar da tanınır: <b>Eflatun</b>, <b>Aristo</b>, <b>Ezop</b>, <b>Tukididis</b>… Önerilen ilk adımlar:</div>` + searchItems.map((b, i) => srItem(b, i, "")).join("");
+      hint.hidden = false;
+      hint.innerHTML = `Başlamak için bir eser ya da yazar adı yazın. Farklı yazımlar da tanınır: <b>Eflatun</b>, <b>Aristo</b>, <b>Ezop</b>, <b>Tukididis</b>… Önerilen ilk adımlar:`;
+      box.innerHTML = searchItems.map((b, i) => srItem(b, i, "")).join("");
     } else {
       const scored = BOOKS.map((b) => {
         if (!tokens.every((t) => b._all.includes(t))) return null;
@@ -1408,9 +1462,13 @@
         return { b, s: s + b.stars * 0.1 };
       }).filter(Boolean).sort((x, y) => y.s - x.s || x.b.order - y.b.order);
       searchItems = scored.slice(0, 8).map((x) => x.b);
-      box.innerHTML = searchItems.length
-        ? searchItems.map((b, i) => srItem(b, i, q)).join("") + (scored.length > 8 ? `<div class="search-results__hint">ve ${scored.length - 8} sonuç daha — “Tüm eserlerde filtrele” bağlantısını kullanın.</div>` : "")
-        : `<div class="search-results__hint">“${esc(q)}” için sonuç bulunamadı. Başka bir yazım deneyin (ör. “Oidipus” yerine “Oedipus”).</div>`;
+      box.innerHTML = searchItems.map((b, i) => srItem(b, i, q)).join("");
+      hint.hidden = searchItems.length > 0;
+      hint.textContent = `“${q}” için sonuç bulunamadı. Başka bir yazım deneyin (ör. “Oidipus” yerine “Oedipus”).`;
+      if (scored.length > 8) {
+        more.hidden = false;
+        more.textContent = `ve ${scored.length - 8} sonuç daha — “Tüm eserlerde filtrele” bağlantısını kullanın.`;
+      }
     }
     searchIndex = 0;
     markSearch();
@@ -1438,45 +1496,66 @@
       if (action) {
         const a = action.dataset.action;
         if (a === "open-search") openSearch();
-        if (a === "toggle-menu") {
-          const nav = $("#mobile-nav");
-          const open = nav.classList.toggle("is-open");
-          action.setAttribute("aria-expanded", String(open));
-          action.setAttribute("aria-label", open ? "Menüyü kapat" : "Menüyü aç");
-          document.body.style.overflow = open ? "hidden" : "";
-        }
-        if (a === "to-top") window.scrollTo({ top: 0, behavior: "smooth" });
+        if (a === "toggle-menu") setMenu(!menuOpen);
+        if (a === "to-top") window.scrollTo({ top: 0, behavior: scrollBehavior() });
+        return;
+      }
+      // "İçeriğe geç" bağlantısı: adres değiştirmeden ana içeriğe odaklan
+      if (t.closest('a[href="#main"]')) {
+        e.preventDefault();
+        $("#main").focus();
         return;
       }
       const scrollTo = t.closest("[data-scroll-to]");
       if (scrollTo) {
         e.preventDefault();
-        document.getElementById(scrollTo.dataset.scrollTo)?.scrollIntoView({ behavior: "smooth", block: "start" });
+        const target = document.getElementById(scrollTo.dataset.scrollTo);
+        if (target) {
+          // Yapışkan başlık ve yüzyıl çubuğu hedefin üstünü örtmesin
+          const offset = $(".site-header").offsetHeight + (scrollTo.closest(".tl-jump")?.offsetHeight || 0) + 12;
+          window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - offset, behavior: scrollBehavior() });
+        }
         return;
       }
       const link = t.closest('a[href^="#/"]');
       if (link) {
-        if (searchOpen) closeSearch();
+        // Yeni sekmede açma (Ctrl/Cmd/Shift + tık) mevcut sayfayı değiştirmez
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (searchOpen) closeSearch(false);
         if (link.getAttribute("href") === location.hash || (link.getAttribute("href") === "#/" && !location.hash)) {
           e.preventDefault();
           closeMenu();
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          window.scrollTo({ top: 0, behavior: scrollBehavior() });
         } else {
           navByClick = true;
         }
+        return;
       }
       if (searchOpen && t === $("#search")) closeSearch();
     });
 
     $("#search-input").addEventListener("input", runSearch);
     $("#search-input").addEventListener("keydown", (e) => {
+      if (!searchItems.length) return;
       if (e.key === "ArrowDown") { e.preventDefault(); searchIndex = Math.min(searchIndex + 1, searchItems.length - 1); markSearch(); }
       else if (e.key === "ArrowUp") { e.preventDefault(); searchIndex = Math.max(searchIndex - 1, 0); markSearch(); }
       else if (e.key === "Enter") {
         e.preventDefault();
         const b = searchItems[searchIndex];
-        if (b) { navByClick = true; closeSearch(); location.hash = "#/kitap/" + b.id; }
+        if (!b) return;
+        closeSearch(false);
+        if (location.hash === "#/kitap/" + b.id) window.scrollTo({ top: 0, behavior: scrollBehavior() });
+        else { navByClick = true; location.hash = "#/kitap/" + b.id; }
       }
+    });
+    // Arama penceresi açıkken Tab odağı pencere içinde döner
+    $("#search").addEventListener("keydown", (e) => {
+      if (e.key !== "Tab") return;
+      const items = $$("#search input, #search a[href]").filter((el) => el.offsetParent !== null);
+      if (!items.length) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     });
 
     document.addEventListener("keydown", (e) => {
@@ -1489,6 +1568,9 @@
         openSearch();
       }
     });
+
+    // Masaüstü genişliğine geçildiğinde açık kalan mobil menüyü kapat
+    window.matchMedia("(min-width: 961px)").addEventListener("change", (e) => { if (e.matches) closeMenu(); });
 
     const toTop = $(".to-top");
     let ticking = false;

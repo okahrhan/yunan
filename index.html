@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="utf-8">
@@ -134,10 +134,14 @@
     <div class="search-panel">
       <div class="search-panel__input">
         <svg class="ico"><use href="#i-search"></use></svg>
-        <input id="search-input" type="search" placeholder="Eser, yazar ya da konu ara… (ör. Eflatun, Troya, Stoa)" autocomplete="off" aria-controls="search-results" aria-autocomplete="list">
+        <input id="search-input" type="search" role="combobox" placeholder="Eser, yazar ya da konu ara… (ör. Eflatun, Troya, Stoa)" autocomplete="off" aria-label="Eser, yazar ya da konu ara" aria-controls="search-results" aria-autocomplete="list" aria-expanded="false">
         <span class="kbd">Esc</span>
       </div>
-      <div class="search-results" id="search-results" role="listbox" aria-label="Arama sonuçları"></div>
+      <div class="search-results">
+        <p class="search-results__hint" id="search-hint" aria-live="polite"></p>
+        <div id="search-results" role="listbox" aria-label="Arama sonuçları"></div>
+        <p class="search-results__hint" id="search-more" hidden></p>
+      </div>
       <div class="search-panel__foot">
         <span>↑ ↓ ile gezin, Enter ile açın</span>
         <a href="#/kitaplar" id="search-all">Tüm eserlerde filtrele <svg class="ico"><use href="#i-arrow-right"></use></svg></a>

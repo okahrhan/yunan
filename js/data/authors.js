@@ -96,7 +96,7 @@ window.KLASIK.authors = {
     life: "MÖ yaklaşık 480 – 406",
     origin: "Atina (geleneğe göre Salamis'te doğdu)",
     places: ["atina"],
-    bio: "Mitleri sorgulayan, kadın karakterlere ve insan psikolojisine odaklanan tragedya yazarı. Ondan günümüze diğer iki büyük tragedya yazarının toplamından daha çok oyun ulaşmıştır. Son yıllarını Makedonya sarayında geçirdi."
+    bio: "Mitleri sorgulayan, kadın karakterlere ve insan psikolojisine odaklanan tragedya yazarı. Ondan günümüze diğer iki büyük tragedya yazarının toplamından daha çok oyun ulaşmıştır. Geleneğe göre son yıllarını Makedonya sarayında geçirdi."
   },
   aristophanes: {
     alt: ["Aristofanes", "Aristophanes"],

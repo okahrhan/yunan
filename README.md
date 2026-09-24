@@ -23,12 +23,32 @@ Site sıradan bir kitap listesi değil; her eser için yazılış tarihini (ve t
 Derleme adımı yoktur; herhangi bir statik sunucu yeterlidir:
 
 ```bash
-npm start            # npx serve ile http://localhost:5173
-# veya
-python3 -m http.server 5173
+python3 -m http.server 5173     # → http://localhost:5173
+# veya (Node.js kuruluysa)
+npm start                       # npx serve ile http://localhost:5173
 ```
 
 `index.html` dosyası doğrudan tarayıcıda (`file://`) açıldığında da çalışır. GitHub Pages gibi statik barındırma hizmetlerine olduğu gibi yüklenebilir.
+
+### Arch Linux'ta adım adım
+
+```bash
+# 1) Gerekli paketler (python çoğu kurulumda zaten vardır)
+sudo pacman -S --needed git python
+
+# 2) Depoyu klonlayın
+git clone https://github.com/okahrhan/yunan.git
+cd yunan
+# Site henüz main dalına birleştirilmediyse dalı belirterek klonlayın:
+#   git clone -b claude/gifted-turing-iruerc https://github.com/okahrhan/yunan.git
+
+# 3) Yerel sunucuyu başlatın ve tarayıcıda http://localhost:5173 adresini açın
+python -m http.server 5173
+```
+
+Sunucuyu `Ctrl+C` ile durdurabilirsiniz. Sunucu kullanmadan açmak için: `xdg-open index.html`.
+Veri doğrulama betiğini çalıştırmak için Node.js gerekir: `sudo pacman -S --needed nodejs npm` ardından `node scripts/validate-data.mjs`.
+Güncellemeleri almak için depo klasöründe `git pull` yeterlidir.
 
 ## Proje yapısı
 

@@ -517,7 +517,7 @@ window.KLASIK.books = (window.KLASIK.books || []).concat([
     alt: ["The Bacchae", "Bakkhai", "Bakkhalar", "Dionysos", "Pentheus"],
     author: "euripides",
     date: "MÖ 407 – 406'da yazıldı; MÖ 405'te sahnelendi",
-    dateNote: "Euripides oyunu hayatının son yıllarında Makedonya'da yazdı. MÖ 406'daki ölümünün ardından Atina'da sahnelendi ve ölümünden sonra birincilik ödülü kazandı.",
+    dateNote: "Geleneğe göre Euripides oyunu hayatının son yıllarında Makedonya'da yazdı. MÖ 406'daki ölümünün ardından Atina'da sahnelendi ve ölümünden sonra birincilik ödülü kazandı.",
     year: -406,
     period: "klasik",
     genre: "Tragedya",
@@ -605,7 +605,7 @@ window.KLASIK.books = (window.KLASIK.books || []).concat([
     tagline: "Kör ve sürgün Oidipus hayatının sonunda Atina'ya sığınıyor: Acının ardından gelen kutsallık.",
     summary: [
       "Kral Oidipus'taki olaylardan yıllar sonra, kör ve yaşlı Oidipus kızı Antigone'nin rehberliğinde uzun süre dolaştıktan sonra Atina yakınlarındaki Kolonos'a ulaşır. Burası öç tanrıçalarına adanmış kutsal bir korudur ve Oidipus burada öleceğine inanır.",
-      "Atina kralı Theseus ona sığınak verir. Ancak Thebai'nin yöneticisi Kreon da oğlu Polyneikes de bir kehanet nedeniyle Oidipus'u kendi taraflarına çekmek ister. Oidipus hayatının son saatlerinde geçmişi, suçu ve adaleti yeniden değerlendirir."
+      "Atina kralı Theseus ona sığınak verir. Ancak hem Thebai'nin yöneticisi Kreon hem de Oidipus'un oğlu Polyneikes, bir kehanet nedeniyle onu kendi taraflarına çekmek ister. Oidipus hayatının son saatlerinde geçmişi, suçu ve adaleti yeniden değerlendirir."
     ],
     importance: [
       "Sophokles'in doğduğu Kolonos'a ve Atina'ya bir veda gibi okunan bu oyun, yaşlı şairin son sözü olarak özel bir yere sahiptir. Kolonos'u öven koro şarkısı Yunan şiirinin en güzel parçalarından sayılır.",
